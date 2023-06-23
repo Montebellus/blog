@@ -2,6 +2,7 @@ class BlogPostsController < ApplicationController
     before_action :authenticate_user!, except: [:index, :show]
     before_action :set_blog_post, except: [:index, :new, :create, :edit]
 
+    protect_from_forgery with: :null_session
 
     def index
         @blog_posts = user_signed_in? ? BlogPost.sorted : BlogPost.published.sorted
@@ -15,20 +16,26 @@ class BlogPostsController < ApplicationController
 
     end
 
+    require 'aws-sdk-s3'
+
     def create
-        @blog_post = BlogPost.new(blog_post_params)
-        @blog_post.published_at = params[:blog_post][:draft] == "0" ? Time.current : nil
-
-
-
-      
-        if @blog_post.save
-          redirect_to @blog_post
-        else
-          render :new, status: :unprocessable_entity
-        end
-      end
-      
+      # ... código para criar o post ...
+    
+      # Fazer upload da imagem para o Amazon S3
+      s3 = Aws::S3::Resource.new
+      bucket_name = 'blog-edu-rails'
+    
+      file = params[:image] # assumindo que o campo de upload de imagem tenha o nome 'image'
+      file_name = file.original_filename
+    
+      obj = s3.bucket(bucket_name).object(file_name)
+      obj.upload_file(file.tempfile, acl: 'public-read')
+    
+      post.image_url = obj.public_url
+    
+      # ... código para salvar o post ...
+    end
+    
 
     def edit
         @blog_post = BlogPost.find(params[:id])
