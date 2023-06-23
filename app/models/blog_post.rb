@@ -1,6 +1,8 @@
 class BlogPost < ApplicationRecord
     has_rich_text :content
 
+    attr_accessor :draft
+
     validates :title, presence: true
     validates :content, presence: true
   

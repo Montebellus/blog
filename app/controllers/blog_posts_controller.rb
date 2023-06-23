@@ -17,12 +17,18 @@ class BlogPostsController < ApplicationController
 
     def create
         @blog_post = BlogPost.new(blog_post_params)
+        @blog_post.published_at = params[:blog_post][:draft] == "0" ? Time.current : nil
+
+
+
+      
         if @blog_post.save
-            redirect_to @blog_post
+          redirect_to @blog_post
         else
-            render :new, status: :unprocessable_entity
+          render :new, status: :unprocessable_entity
         end
-    end
+      end
+      
 
     def edit
         @blog_post = BlogPost.find(params[:id])
